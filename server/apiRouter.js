@@ -5,11 +5,10 @@
  * The endpoints should not clash with the application routes. Therefore, the
  * endpoints are prefixed in the main server where this file is used.
  */
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const { deserialize } = require('./api-util/sdk');
-
+const { login, signup, logout, currentUser, deleteUser } = require('./api/endpoints');
 const initiateLoginAs = require('./api/initiate-login-as');
 const loginAs = require('./api/login-as');
 const transactionLineItems = require('./api/transaction-line-items');
@@ -55,35 +54,12 @@ router.post('/transaction-line-items', transactionLineItems);
 router.post('/initiate-privileged', initiatePrivileged);
 router.post('/transition-privileged', transitionPrivileged);
 
-// New custom /login route
-router.post('/login', async (req, res, next) => {
-  const { email, password } = req.body;
-
-  // Basic validation
-  if (!email || !password) {
-    return next(createError(400, 'Email and password are required'));
-  }
-
-  try {
-    // Initialize SDK
-    const sdk = createSdk({ clientId: process.env.REACT_APP_SHARETRIBE_SDK_CLIENT_ID });
-
-    // Login user using Sharetribe SDK
-    const loginResponse = await sdk.login({ email, password });
-
-    // Fetch current user details
-    const userResponse = await sdk.currentUser.show();
-
-    // Send response
-    res.status(200).json({
-      access_token: loginResponse.data.access_token,
-      user: userResponse.data,
-    });
-  } catch (error) {
-    // Handle SDK errors
-    return next(createError(401, error.message || 'Login failed'));
-  }
-});
+// New custom routes for ShareTribe
+router.post('/login', login);
+router.post('/create-user', signup);
+router.post('/logout', logout);
+router.get('/getcurrentuser', currentUser);
+router.post('/deleteuser', deleteUser);
 
 // Create user with identity provider (e.g. Facebook or Google)
 // This endpoint is called to create a new user after user has confirmed

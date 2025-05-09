@@ -28,6 +28,7 @@ app.use(
   })
 );
 app.use(cookieParser());
+app.use(express.json());
 app.use('/.well-known', wellKnownRouter);
 app.use('/api', apiRouter);
 
