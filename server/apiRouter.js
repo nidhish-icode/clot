@@ -55,6 +55,36 @@ router.post('/transaction-line-items', transactionLineItems);
 router.post('/initiate-privileged', initiatePrivileged);
 router.post('/transition-privileged', transitionPrivileged);
 
+// New custom /login route
+router.post('/login', async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // Basic validation
+  if (!email || !password) {
+    return next(createError(400, 'Email and password are required'));
+  }
+
+  try {
+    // Initialize SDK
+    const sdk = createSdk({ clientId: process.env.REACT_APP_SHARETRIBE_SDK_CLIENT_ID });
+
+    // Login user using Sharetribe SDK
+    const loginResponse = await sdk.login({ email, password });
+
+    // Fetch current user details
+    const userResponse = await sdk.currentUser.show();
+
+    // Send response
+    res.status(200).json({
+      access_token: loginResponse.data.access_token,
+      user: userResponse.data,
+    });
+  } catch (error) {
+    // Handle SDK errors
+    return next(createError(401, error.message || 'Login failed'));
+  }
+});
+
 // Create user with identity provider (e.g. Facebook or Google)
 // This endpoint is called to create a new user after user has confirmed
 // they want to continue with the data fetched from IdP (e.g. name and email)
