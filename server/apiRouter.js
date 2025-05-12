@@ -8,7 +8,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { deserialize } = require('./api-util/sdk');
-const { login, signup, logout, currentUser, deleteUser } = require('./api/endpoints');
+const { login, signup, logout, currentUser, deleteUser, uploadImage } = require('./api/endpoints');
 const initiateLoginAs = require('./api/initiate-login-as');
 const loginAs = require('./api/login-as');
 const transactionLineItems = require('./api/transaction-line-items');
@@ -60,6 +60,7 @@ router.post('/create-user', signup);
 router.post('/logout', logout);
 router.get('/getcurrentuser', currentUser);
 router.post('/deleteuser', deleteUser);
+router.post('/uploadimg', uploadImage);
 
 // Create user with identity provider (e.g. Facebook or Google)
 // This endpoint is called to create a new user after user has confirmed

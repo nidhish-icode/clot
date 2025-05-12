@@ -20,6 +20,7 @@ module.exports = (req, res) => {
       // Fetch current user details
       return sdk.currentUser.show().then(userResponse => ({
         access_token: loginResponse.data.access_token,
+        refresh_token: loginResponse.data.refresh_token,
         user: userResponse.data,
       }));
     })
