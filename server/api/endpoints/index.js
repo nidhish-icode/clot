@@ -4,6 +4,7 @@ const logout = require('./logout');
 const currentUser = require('./currentUser');
 const deleteUser = require('./deleteUser');
 const uploadImage = require('./uploadImage');
+const updateUserProfile = require('./updateUserProfile');
 
 module.exports = {
   login,
@@ -12,4 +13,5 @@ module.exports = {
   currentUser,
   deleteUser,
   uploadImage,
+  updateUserProfile,
 };
