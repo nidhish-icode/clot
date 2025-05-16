@@ -7,6 +7,7 @@
  */
 const express = require('express');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const { deserialize } = require('./api-util/sdk');
 const {
   login,
@@ -38,7 +39,8 @@ router.use(
     type: 'application/transit+json',
   })
 );
-
+router.use(express.urlencoded({ extended: true }));
+router.use(cookieParser());
 // Deserialize Transit body string to JS data
 router.use((req, res, next) => {
   if (req.get('Content-Type') === 'application/transit+json' && typeof req.body === 'string') {
@@ -66,7 +68,7 @@ router.post('/transition-privileged', transitionPrivileged);
 router.post('/login', login);
 router.post('/create-user', signup);
 router.post('/logout', logout);
-router.get('/getcurrentuser', currentUser);
+router.post('/getcurrentuser', currentUser);
 router.post('/deleteuser', deleteUser);
 router.post('/uploadimg', uploadImage);
 router.post('/update-profile', updateUserProfile);

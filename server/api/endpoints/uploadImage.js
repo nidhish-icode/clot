@@ -1,6 +1,7 @@
 const { getSdk, handleError } = require('../../api-util/sdk');
 const multer = require('multer');
 const FormData = require('form-data'); // For creating multipart/form-data
+const tokenRefreshMiddleware = require('./middleware/tokenRefreshMiddleware');
 
 // Configure multer for file uploads with memory storage
 const upload = multer({
@@ -16,11 +17,13 @@ const upload = multer({
 });
 
 module.exports = [
+  // Token refresh middleware to handle X-Refresh-Token header
+  tokenRefreshMiddleware,
   // Multer middleware to handle file upload
   upload.single('image'),
   async (req, res) => {
     try {
-      console.log('Upload image request:', req.file);
+      console.log('Upload image request header---------------------:', req.headers);
 
       // Basic validation
       if (!req.file) {
@@ -47,6 +50,7 @@ module.exports = [
         contentType: req.file.mimetype,
       });
 
+      // Use getSdk with modified request (has cookie from middleware)
       const sdk = getSdk(req, res);
 
       // Prepare parameters for Sharetribe SDK
@@ -78,12 +82,14 @@ module.exports = [
       const imageUuid = response.data.data.id;
       const imageUrl = response.data.data.attributes.variants.default.url;
 
-      // Send success response
+      // Send success response with new_refresh_token
       res.status(200).json({
         data: {
           imageUuid,
           imageUrl,
         },
+        new_refresh_token: res.locals.new_refresh_token,
+        expires_in: res.locals.expires_in,
       });
     } catch (error) {
       console.error('Image upload error:', {
