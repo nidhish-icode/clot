@@ -11,7 +11,10 @@ module.exports = [
     const sdk = getSdk(req, res);
 
     sdk.currentUser
-      .show()
+      .show({
+        expand: true,
+        include: ['images', 'profileImage'],
+      })
       .then(response => {
         console.log('Current user response:', response);
 

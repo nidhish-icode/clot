@@ -17,6 +17,7 @@ const {
   deleteUser,
   uploadImage,
   updateUserProfile,
+  sendVerificationEmail,
 } = require('./api/endpoints');
 const initiateLoginAs = require('./api/initiate-login-as');
 const loginAs = require('./api/login-as');
@@ -72,6 +73,7 @@ router.post('/getcurrentuser', currentUser);
 router.post('/deleteuser', deleteUser);
 router.post('/uploadimg', uploadImage);
 router.post('/update-profile', updateUserProfile);
+router.post('/sendverificationemail', sendVerificationEmail);
 
 // Create user with identity provider (e.g. Facebook or Google)
 // This endpoint is called to create a new user after user has confirmed

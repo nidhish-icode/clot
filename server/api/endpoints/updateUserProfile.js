@@ -1,8 +1,52 @@
 const { getSdk, handleError } = require('../../api-util/sdk');
 const { body, validationResult } = require('express-validator');
 const { v4: isUUID } = require('uuid');
+const tokenRefreshMiddleware = require('./middleware/tokenRefreshMiddleware');
+
+// Middleware to parse and sanitize request body
+const sanitizeBody = (req, res, next) => {
+  // If no body or empty object, proceed with empty body
+  if (!req.body || Object.keys(req.body).length === 0) {
+    req.body = {};
+    return next();
+  }
+
+  try {
+    // Clean the body: remove undefined, null, empty strings, or invalid fields
+    const cleanedBody = {};
+    for (const [key, value] of Object.entries(req.body)) {
+      // Skip if value is undefined, null, or empty string (except for bio, which we handle later)
+      if (
+        value === undefined ||
+        value === null ||
+        (typeof value === 'string' && value.trim() === '' && key !== 'bio')
+      ) {
+        continue;
+      }
+      // For objects (e.g., protectedData), only include if they have non-empty keys
+      if (typeof value === 'object' && value !== null && Object.keys(value).length > 0) {
+        cleanedBody[key] = value;
+      } else if (typeof value !== 'object') {
+        cleanedBody[key] = value;
+      }
+    }
+    req.body = cleanedBody;
+    next();
+  } catch (error) {
+    console.error('Body sanitization error:', error);
+    return res
+      .status(400)
+      .json({ errors: [{ msg: 'Invalid JSON body. Please ensure all fields are valid.' }] });
+  }
+};
 
 module.exports = [
+  // Token refresh middleware
+  tokenRefreshMiddleware,
+
+  // Sanitize body before validation
+  sanitizeBody,
+
   // Validation middleware
   body('firstName')
     .optional()
@@ -90,22 +134,55 @@ module.exports = [
       privateData,
     } = req.body;
 
-    // Prepare bodyParams for SDK
+    // Prepare bodyParams for SDK, only include defined and non-empty values
     const bodyParams = {};
 
-    if (firstName !== undefined) bodyParams.firstName = firstName;
-    if (lastName !== undefined) bodyParams.lastName = lastName;
-    if (displayName !== undefined) bodyParams.displayName = displayName;
-    if (bio !== undefined) bodyParams.bio = bio;
-    if (profileImageId !== undefined) {
+    if (firstName && firstName.trim()) bodyParams.firstName = firstName.trim();
+    if (lastName && lastName.trim()) bodyParams.lastName = lastName.trim();
+    if (displayName && displayName.trim()) bodyParams.displayName = displayName.trim();
+    // Only include bio if it's a non-empty string or explicitly null
+    if (bio !== undefined && bio !== null && (bio.trim() || bio === null)) {
+      bodyParams.bio = bio;
+    }
+    if (profileImageId !== undefined && profileImageId !== null) {
       bodyParams.profileImageId =
         typeof profileImageId === 'object' && profileImageId.uuid
           ? profileImageId
           : { uuid: profileImageId };
     }
-    if (publicData !== undefined) bodyParams.publicData = publicData;
-    if (protectedData !== undefined) bodyParams.protectedData = protectedData;
-    if (privateData !== undefined) bodyParams.privateData = privateData;
+    if (publicData && Object.keys(publicData).length > 0) bodyParams.publicData = publicData;
+    if (protectedData && Object.keys(protectedData).length > 0)
+      bodyParams.protectedData = protectedData;
+    if (privateData && Object.keys(privateData).length > 0) bodyParams.privateData = privateData;
+
+    // If no valid params, return early with current user data
+    if (Object.keys(bodyParams).length === 0) {
+      console.log('No valid parameters provided, returning current user');
+      return sdk.currentUser
+        .show()
+        .then(response => {
+          const userData = response.data.data;
+          res.status(200).json({
+            data: {
+              id: userData.id,
+              firstName: userData.attributes.profile.firstName,
+              lastName: userData.attributes.profile.lastName,
+              displayName: userData.attributes.profile.displayName,
+              bio: userData.attributes.profile.bio,
+              publicData: userData.attributes.profile.publicData,
+              protectedData: userData.attributes.profile.protectedData,
+              privateData: userData.attributes.profile.privateData,
+              profileImage: null, // Simplified, as no image update
+            },
+            new_refresh_token: res.locals.new_refresh_token,
+            expires_in: res.locals.expires_in,
+          });
+        })
+        .catch(error => {
+          console.error('Current user fetch error:', error);
+          handleError(res, error);
+        });
+    }
 
     // Query parameters
     console.log('bodyparams uploading', bodyParams);
@@ -148,6 +225,8 @@ module.exports = [
                 }
               : null,
           },
+          new_refresh_token: res.locals.new_refresh_token,
+          expires_in: res.locals.expires_in,
         });
       })
       .catch(error => {
