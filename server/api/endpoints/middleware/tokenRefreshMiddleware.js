@@ -4,7 +4,7 @@ const { handleError } = require('../../../api-util/sdk');
 
 // Environment variables
 const CLIENT_ID = process.env.REACT_APP_SHARETRIBE_SDK_CLIENT_ID;
-const CLIENT_SECRET = process.env.REACT_APP_SHARETRIBE_SDK_CLIENT_SECRET;
+const CLIENT_SECRET = process.env.SHARETRIBE_SDK_CLIENT_SECRET;
 const TOKEN_URL = 'https://flex-api.sharetribe.com/v1/auth/token';
 
 // Middleware to handle token refresh and simulate cookie for getSdk
