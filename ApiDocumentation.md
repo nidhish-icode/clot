@@ -193,7 +193,6 @@ Logs out the current user, invalidating the access token.
 - **Headers**:
   ```http
   Content-Type: application/json
-  Authorization: Bearer <access_token>
   X-Refresh-Token: <refresh_token>
   ```
 - **Request Body**: Empty (`{}`)
@@ -201,7 +200,6 @@ Logs out the current user, invalidating the access token.
   ```bash
   curl -X POST https://your-backend.com/api/logout \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <access_token>" \
   -H "X-Refresh-Token: <refresh_token>" \
   -d '{}'
   ```
@@ -229,7 +227,6 @@ Retrieves the current user’s profile information.
 - **Headers**:
   ```http
   Content-Type: application/json
-  Authorization: Bearer <access_token>
   X-Refresh-Token: <refresh_token>
   ```
 - **Request Body**: Empty (`{}`)
@@ -237,7 +234,6 @@ Retrieves the current user’s profile information.
   ```bash
   curl -X POST https://your-backend.com/api/getcurrentuser \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <access_token>" \
   -H "X-Refresh-Token: <refresh_token>" \
   -d '{}'
   ```
@@ -290,7 +286,6 @@ Deletes the current user’s account.
 - **Headers**:
   ```http
   Content-Type: application/json
-  Authorization: Bearer <access_token>
   X-Refresh-Token: <refresh_token>
   ```
 - **Request Body**:
@@ -304,7 +299,6 @@ Deletes the current user’s account.
   ```bash
   curl -X POST https://your-backend.com/api/deleteuser \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <access_token>" \
   -H "X-Refresh-Token: <refresh_token>" \
   -d '{"currentPassword":"password123"}'
   ```
@@ -340,7 +334,6 @@ Uploads an image to be used as the user’s profile picture.
 - **Headers**:
   ```http
   Content-Type: multipart/form-data
-  Authorization: Bearer <access_token>
   X-Refresh-Token: <refresh_token>
   ```
 - **Request Body**:
@@ -348,7 +341,6 @@ Uploads an image to be used as the user’s profile picture.
 - **Example Request**:
   ```bash
   curl -X POST https://your-backend.com/api/uploadimg \
-  -H "Authorization: Bearer <access_token>" \
   -H "X-Refresh-Token: <refresh_token>" \
   -F "image=@/path/to/image.jpg"
   ```
@@ -385,7 +377,6 @@ Updates the current user’s profile information.
 - **Headers**:
   ```http
   Content-Type: application/json
-  Authorization: Bearer <access_token>
   X-Refresh-Token: <refresh_token>
   ```
 - **Query Parameters**:
@@ -415,7 +406,6 @@ Updates the current user’s profile information.
   ```bash
   curl -X POST https://your-backend.com/api/update-profile?expand=true&include=profileImage&fields.image=variants.square-small,variants.square-small2x,variants.default \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <access_token>" \
   -H "X-Refresh-Token: <refresh_token>" \
   -d '{"protectedData":{"phoneNumber":"+91-8862898972"}}'
   ```
@@ -461,7 +451,6 @@ Triggers a verification email for the current user.
 - **Headers**:
   ```http
   Content-Type: application/json
-  Authorization: Bearer <access_token>
   X-Refresh-Token: <refresh_token>
   ```
 - **Request Body**: Empty (`{}`)
@@ -469,7 +458,6 @@ Triggers a verification email for the current user.
   ```bash
   curl -X POST https://your-backend.com/api/sendverificationemail \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <access_token>" \
   -H "X-Refresh-Token: <refresh_token>" \
   -d '{}'
   ```
@@ -530,13 +518,13 @@ or
 
 - **FlutterFlow Integration**:
   - Import endpoints via Postman collection.
-  - Map `Authorization` and `X-Refresh-Token` headers to `userToken` and `refreshToken` app state variables.
+  - Map `X-Refresh-Token` headers to `userToken` and `refreshToken` app state variables.
   - Handle `new_refresh_token` in responses to update `userToken`.
   - Use `/sendverificationemail` in the email verification modal.
 
 - **Testing**:
   - Use Postman to test endpoints before integrating.
-  - Ensure valid `access_token` and `refresh_token` are used for authenticated requests.
+  - Ensure valid `refresh_token` are used for authenticated requests.
 
 - **Image Upload**:
   - Use `multipart/form-data` for `/uploadimg`.
