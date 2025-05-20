@@ -39,7 +39,6 @@ Most endpoints require an `Authorization` header with a Bearer token obtained fr
 - **For all other endpoints**:
   ```http
   Content-Type: application/json
-  Authorization: Bearer <access_token>
   X-Refresh-Token: <refresh_token>
   ```
   - **Exception**: `/uploadimg` uses `Content-Type: multipart/form-data`.
